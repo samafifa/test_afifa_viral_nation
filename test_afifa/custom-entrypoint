@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+if [ $DB_SOURCE == "local_postgres" ]
+then
+  echo "waiting for local dev database"
+  wait-for-it.sh -t 120 $DB_HOST:$DB_PORT
+else
+  echo "unknown database specified, so not waiting"
+fi
+
+echo "starting $@"
+exec "$@"

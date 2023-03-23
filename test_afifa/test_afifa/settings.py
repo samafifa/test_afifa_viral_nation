@@ -67,7 +67,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -105,7 +105,7 @@ DATABASES = {
         'NAME': get_from_config("DB_NAME", "test_afifa"),
         'USER': get_from_config("DB_USER", "postgres"),
         'PASSWORD': get_from_config("DB_PASSWORD", "admin#afifa"),
-        'HOST': get_from_config("DB_HOST", "testdb"),
+        'HOST': get_from_config("DB_HOST", "postgresdb"),
         'PORT': get_from_config("DB_PORT", "5432")
     }
 }
@@ -161,3 +161,6 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+MONGO_URI = f"mongodb://{get_from_config('MONGO_DB_USER', 'root')}:{get_from_config('MONGO_DB_PASSWORD', 'admin#afifa')}@mongodb:27017/"
+MONGO_DB_NAME = 'test_afifa'

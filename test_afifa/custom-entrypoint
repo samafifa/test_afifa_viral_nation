@@ -1,8 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "waiting for local dev database"
+echo "waiting for local postgres database"
 wait-for-it.sh -t 120 $DB_HOST:$DB_PORT
+
+echo "waiting for local mongo db"
+wait-for-it.sh -t 120 $MONGO_DB_HOST:$MONGO_DB_PORT
 
 echo "starting $@"
 exec "$@"

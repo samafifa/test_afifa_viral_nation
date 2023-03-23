@@ -1,8 +1,8 @@
 version: '3.6'
 
 services:
-  testdb:
-    container_name: testdb
+  postgresdb:
+    container_name: postgresdb
     image: postgres:10.7
     environment:
       POSTGRES_PASSWORD: admin#afifa  # superuser password, username is postgres
@@ -11,6 +11,22 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  mongodb:
+    container_name: mongodb
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin#afifa
+      MONGO_INITDB_DATABASE: test_afifa
+    ports:
+      - "27017:27017"
+    env_file:
+      - project_config.env
+    volumes:
+      - ./data/mongo:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   redis:
     container_name: redis
@@ -25,7 +41,8 @@ services:
     volumes:
     - ./:/usr/src/app/
     depends_on:
-      - testdb
+      - postgresdb
+      - mongodb
       - redis
     restart: always
     env_file:
@@ -41,7 +58,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - testdb
+      - postgresdb
+      - mongodb
       - redis
       - celery
     env_file:

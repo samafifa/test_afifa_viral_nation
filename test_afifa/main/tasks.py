@@ -1,6 +1,7 @@
 import requests
 import json
 
+from django.db import transaction, IntegrityError
 from celery import shared_task
 
 from main.models import Users
@@ -16,12 +17,26 @@ def add_users_to_db():
 
         for d in data:
             if not Users.objects.filter(username=d['username']).exists():
-                Users.objects.create(
-                    username=d['username'],
-                    password=d['password'],
-                    firstname=d['name']['firstname'],
-                    lastname=d['name']['lastname'],
-                    address=d['address'],
-                    phonenumber=d['phone']
-                )
+                try:
+                    # make database operation thread safe
+                    with transaction.atomic():
+                        user = Users.objects.create(
+                            username=d['username'],
+                            password=d['password'],
+                            firstname=d['name']['firstname'],
+                            lastname=d['name']['lastname'],
+                            address=d['address'],
+                            phonenumber=d['phone']
+                        )
+                except IntegrityError:
+                    # todo make this thread safe
+                    users.insert_one({
+                        "_id": user.id,
+                        "username": d['username'],
+                        "password": d['password'],
+                        "firstname": d['name']['firstname'],
+                        "lastname": d['name']['lastname'],
+                        "address": d['address'],
+                        "phonenumber": d['phone']
+                    })
 

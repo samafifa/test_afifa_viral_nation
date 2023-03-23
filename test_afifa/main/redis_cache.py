@@ -15,14 +15,14 @@ class RedisDBConnector(object):
             db=0
         )
 
-    def add_product(self, product_id, product_name):
+    def add_product(self, product_id, product_details):
         """
         add key-value pair to redis database
 
         :params data: dict of key-value pairs to be added
         :return True
         """
-        self.redisdb_client.setex([product_id], timedelta(minutes=5), product_name)
+        self.redisdb_client.setex(product_id, timedelta(minutes=5), json.dumps(product_details, default=str))
 
         return True
 
@@ -33,16 +33,12 @@ class RedisDBConnector(object):
         :params keys: list of keys
         :return rtype -> dict, values from redis database
         """
-        return self.redisdb_client.get(product_id)
+        product_details = self.redisdb_client.get(product_id)
 
-    def get_product_by_name(self, product_name):
-        """
-        get key value from redis database
+        if isinstance(product_details, str) or isinstance(product_details, bytes):
+            product_details = json.loads(product_details)
 
-        :params keys: list of keys
-        :return rtype -> dict, values from redis database
-        """
-        return self.redisdb_client.get(product_name)
+        return product_details
 
     def remove(self, keys):
         """

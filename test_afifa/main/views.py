@@ -4,6 +4,7 @@ import json
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.core import serializers
 
 from test_afifa.settings import REDIS_URL
 from main.models import Users, Product
@@ -92,11 +93,30 @@ def get_products_from_postgres_db(request):
 @api_view(['GET'])
 def get_product_by_id(request):
     try:
+        if 'productID' not in request.query_params.keys():
+            return Response({"error": "productID is required"}, status=422)
+
         id = request.query_params['productID']
 
-        product = redis_conn.get_product_by_id(id)
+        # try to fetch from redis cache
+        product = redis_conn.get_product_by_id(int(id))
 
-        return Response({"product": 'product'}, status=200)
+        # if not in cache fetch from database and add to cache
+        if product is None:
+            if not Product.objects.filter(id=int(id)).exists():
+                return Response({"error": "Product not found"}, status=200)
+
+            # fetch from database and serialize query set
+            product = serializers.serialize('json', Product.objects.filter(id=int(id)))
+            product = json.loads(product)[0]
+
+            # add to redis cache
+            redis_conn.add_product(product['pk'], product['fields'])
+            product = product['fields']
+
+        product['id'] = int(id)
+
+        return Response({"product": product}, status=200)
     except:
         traceback.print_exc()
         return Response({'error': 'Something went wrong'}, status=500)

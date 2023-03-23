@@ -1,11 +1,43 @@
 import traceback
 import requests
+import json
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from main.models import Users
+from test_afifa.settings import REDIS_URL
+from main.models import Users, Product
 from main.mongodb import users
+from main.tasks import add_users_to_db
+
+from redis_cache import RedisDBConnector
+
+
+redis_conn = RedisDBConnector(
+    host=REDIS_URL,
+    port=6379,
+    password=''
+)
+
+
+# =====================================================
+# add dummy data to product table
+def add_data_to_product_table():
+    try:
+        with open('products.json', 'r') as f:
+            d = json.load(f)
+
+            for p in d:
+                if not Product.objects.filter(product_name=p['productName']).exists():
+                    Product.objects.create(
+                        product_name=p['productName']
+                    )
+    except:
+        traceback.print_exc()
+
+
+add_data_to_product_table()
+# =====================================================
 
 
 @api_view(['POST'])
@@ -16,12 +48,9 @@ def fetch_users(request):
 
         count = request.data['count']
 
-        response = requests.get(url="https://fakestoreapi.com/users", verify=False)
+        task = add_users_to_db.delay(count)
 
-        if response.status_code != 200:
-            return Response({'error': 'Unable to get data'}, status=422)
-
-        return Response({'data': response.text}, status=200)
+        return Response({'status': True, 'taskId': task.id}, status=200)
     except:
         traceback.print_exc()
         return Response({'error': 'Something went wrong'}, status=500)
@@ -45,3 +74,27 @@ def get_users_from_mongo_db(request):
     except:
         traceback.print_exc()
         return Response({'error': 'Something went wrong'}, status=500)
+
+
+@api_view(['GET'])
+def get_products_from_postgres_db(request):
+    try:
+        all_products = list(Product.objects.all().values())
+        return Response({"allUsers": all_products}, status=200)
+    except:
+        traceback.print_exc()
+        return Response({'error': 'Something went wrong'}, status=500)
+
+
+@api_view(['GET'])
+def get_product_by_id(request):
+    try:
+        id = request.query_params['productID']
+
+        product = redis_conn.get_product_by_id(id)
+
+        return Response({"product": 'product'}, status=200)
+    except:
+        traceback.print_exc()
+        return Response({'error': 'Something went wrong'}, status=500)
+

@@ -20,5 +20,7 @@ from main import views
 urlpatterns = [
     path('fetch-users', views.fetch_users),
     path('postgres/get-users', views.get_users_from_postgres_db),
-    path('mongo/get-users', views.get_users_from_mongo_db)
+    path('mongo/get-users', views.get_users_from_mongo_db),
+    path('get-all-products', views.get_products_from_postgres_db),
+    path('get-product', views.get_product_by_id)
 ]

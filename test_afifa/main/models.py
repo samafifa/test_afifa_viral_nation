@@ -12,3 +12,12 @@ class Users(models.Model):
     firstname = models.CharField(max_length=140, default='Unknown', null=True)
     lastname = models.CharField(max_length=140, default=None, null=True)
     phonenumber = models.CharField(max_length=25, default=None, null=True)
+
+
+class Product(models.Model):
+    class Meta:
+        db_table = 'product'
+
+    id = models.AutoField(primary_key=True)
+    product_name = models.CharField(max_length=140, default=None, null=True)
+    added_on = models.DateTimeField(auto_created=True, default=None, null=True, unique=True)

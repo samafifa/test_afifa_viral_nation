@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main'
 ]
 
 MIDDLEWARE = [
@@ -100,8 +101,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': get_from_config("DB_NAME", "test_afifa"),
-        'USER': get_from_config("DB_USER", "postgres"),
-        'PASSWORD': get_from_config("DB_PASSWORD", "BrightBox1234"),
+        'USER': get_from_config("DB_USER", "afifa"),
+        'PASSWORD': get_from_config("DB_PASSWORD", "admin@afifa"),
         'HOST': get_from_config("DB_HOST", "db"),
         'PORT': get_from_config("DB_PORT", "5432")
     }
@@ -150,3 +151,5 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REDIS_URL = 'redis://redis:6379'

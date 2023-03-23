@@ -1,4 +1,4 @@
-celery==5.1.2                 # celery async task manager
+celery[redis]==5.1.2                 # celery async task manager
 channels==3.0.4               # required for websocket
 
 Django==3.1.6                 # django
@@ -15,6 +15,8 @@ PyJWT==1.4.0                  # jwt token auth
 
 pymongo==3.11.3               # manipulate mongo database
 
-redis==3.3.11                 # used as celery broker and backend
+redis==3.4.1                 # used as celery broker and backend
 
 python-dotenv==0.19.0
+
+psycopg2==2.8.6               # postgresql python database adapter

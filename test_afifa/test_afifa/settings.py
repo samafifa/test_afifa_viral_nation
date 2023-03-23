@@ -48,7 +48,7 @@ SECRET_KEY = 'django-insecure-285+bvxb-7!gf_jzuy%hb$*^b@5!@)ba+tbav#r63m1tjt%m-t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -60,12 +60,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'main'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -101,9 +103,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': get_from_config("DB_NAME", "test_afifa"),
-        'USER': get_from_config("DB_USER", "afifa"),
-        'PASSWORD': get_from_config("DB_PASSWORD", "admin@afifa"),
-        'HOST': get_from_config("DB_HOST", "db"),
+        'USER': get_from_config("DB_USER", "postgres"),
+        'PASSWORD': get_from_config("DB_PASSWORD", "admin#afifa"),
+        'HOST': get_from_config("DB_HOST", "testdb"),
         'PORT': get_from_config("DB_PORT", "5432")
     }
 }
@@ -153,3 +155,9 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REDIS_URL = 'redis://redis:6379'
+
+CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

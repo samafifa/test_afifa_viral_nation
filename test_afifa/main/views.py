@@ -1,5 +1,5 @@
 import traceback
-import requests
+import sys
 import json
 
 from rest_framework.decorators import api_view
@@ -24,7 +24,7 @@ redis_conn = RedisDBConnector(
 # add dummy data to product table
 def add_data_to_product_table():
     try:
-        with open('products.json', 'r') as f:
+        with open('main/products.json', 'r') as f:
             d = json.load(f)
 
             for p in d:
@@ -36,7 +36,9 @@ def add_data_to_product_table():
         traceback.print_exc()
 
 
-add_data_to_product_table()
+if 'makemigrations' not in sys.argv or 'migrate' not in sys.argv:
+    # do not execute during migrations
+    add_data_to_product_table()
 # =====================================================
 
 
@@ -81,7 +83,7 @@ def get_users_from_mongo_db(request):
 def get_products_from_postgres_db(request):
     try:
         all_products = list(Product.objects.all().values())
-        return Response({"allUsers": all_products}, status=200)
+        return Response({"allProducts": all_products}, status=200)
     except:
         traceback.print_exc()
         return Response({'error': 'Something went wrong'}, status=500)

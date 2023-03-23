@@ -20,4 +20,4 @@ class Product(models.Model):
 
     id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=140, default=None, null=True)
-    added_on = models.DateTimeField(auto_created=True, default=None, null=True, unique=True)
+    added_on = models.DateTimeField(auto_now_add=True, null=True)

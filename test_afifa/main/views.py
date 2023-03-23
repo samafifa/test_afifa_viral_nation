@@ -10,7 +10,7 @@ from main.models import Users, Product
 from main.mongodb import users
 from main.tasks import add_users_to_db
 
-from redis_cache import RedisDBConnector
+from main.redis_cache import RedisDBConnector
 
 
 redis_conn = RedisDBConnector(
@@ -48,9 +48,10 @@ def fetch_users(request):
 
         count = request.data['count']
 
-        task = add_users_to_db.delay(count)
+        for i in range(count):
+            add_users_to_db.delay()
 
-        return Response({'status': True, 'taskId': task.id}, status=200)
+        return Response({'status': True}, status=200)
     except:
         traceback.print_exc()
         return Response({'error': 'Something went wrong'}, status=500)

@@ -39,6 +39,11 @@ def get_from_config(setting, default=None):
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.isdir(LOG_DIR):
+    os.mkdir(LOG_DIR)
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -134,6 +139,60 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s %(name)s : \n%(message)s\n'
+        },
+    },
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse"
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "ERROR",
+            # "level": "DEBUG",
+            "filters": ["require_debug_false"],
+            "class": "logging.StreamHandler"
+        }, # file handlers don't work in docker
+        # 'request_error_handler': {
+        #     'level': 'INFO',
+        #     # 'class': 'logging.handlers.RotatingFileHandler',
+        #     'class': 'logging.FileHandler',
+        #     'filename': os.path.join(LOG_DIR, f'req_error_log.log'),
+        #     # 'maxBytes': 1024*1024*5,  # 5 MB  # disabled for windows host
+        #     # 'backupCount': 10,  # disabled for windows host
+        #     'formatter': 'standard',
+        #     'mode': 'a'
+        # },
+        # 'celery_handler': {
+        #     'level': 'ERROR',
+        #     # 'class': 'logging.handlers.RotatingFileHandler',  # disabled for windows host
+        #     'class': 'logging.FileHandler',
+        #     'filename': os.path.join(LOG_DIR, f'celery_log.log'),
+        #     # 'maxBytes': 1024*1024*5,  # 5 MB  disabled for windows host
+        #     # 'backupCount': 10,  # disabled for windows host
+        #     'formatter': 'standard',
+        #     'mode': 'a'
+        # },
+    },
+    "loggers": {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'celery': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

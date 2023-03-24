@@ -3,7 +3,7 @@ import requests
 import json
 
 import traceback
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError
 from celery import shared_task
 
 from main.models import Users
@@ -20,34 +20,39 @@ def add_users_to_db():
         user_created = False
         for d in data:
             if not Users.objects.filter(username=d['username']).exists():
+                # to make operation thread safe check for already existing user
+                # if Integrity exception raised user already created
+                # by another thread
                 try:
-                    # make database operation thread safe
-                    with transaction.atomic():
-                        user = Users.objects.create(
-                            username=d['username'],
-                            password=d['password'],
-                            firstname=d['name']['firstname'],
-                            lastname=d['name']['lastname'],
-                            address=d['address'],
-                            phonenumber=d['phone']
-                        )
-                        user_created = True
+                    user = Users.objects.create(
+                        username=d['username'],
+                        password=d['password'],
+                        firstname=d['name']['firstname'],
+                        lastname=d['name']['lastname'],
+                        address=d['address'],
+                        phonenumber=d['phone']
+                    )
                 except IntegrityError:
                     traceback.print_exc()
+                else:
+                    user_created = True
 
                 # check if user was created
                 if user_created:
                     try:
-                        # make pymongo thread safe
-                        users.insert_one({
-                            "_id": user.id,
-                            "username": d['username'],
-                            "password": d['password'],
-                            "firstname": d['name']['firstname'],
-                            "lastname": d['name']['lastname'],
-                            "address": d['address'],
-                            "phonenumber": d['phone']
-                        })
+                        # check if user already exists
+                        u = users.find_one({"id": user.id})
+
+                        if u is None:
+                            users.insert_one({
+                                "id": user.id,
+                                "username": d['username'],
+                                "password": d['password'],
+                                "firstname": d['name']['firstname'],
+                                "lastname": d['name']['lastname'],
+                                "address": d['address'],
+                                "phonenumber": d['phone']
+                            })
                     except pymongo.errors.DuplicateKeyError:
                         traceback.print_exc()
 

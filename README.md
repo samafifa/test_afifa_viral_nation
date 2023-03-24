@@ -17,3 +17,31 @@ Run Project
 - The APIs will be accessible on http://localhost:8000
 - To stop/exit the project run the following command<br>
 `docker-compose down`
+
+## APIs
+
+- URL: /doc<br>
+  Method: GET<br>
+  Description: open API docs of project
+
+- URL: /get-all-products<br>
+  Method: GET<br>
+  Description: get all products from postgres database
+
+- URL: /get-product<br>
+  Method: GET<br>
+  Description: get product from cache or postgres database using product id
+
+- URL: /fetch-users<br>
+  Method: POST<br>
+  Body: {"count": <integerValue>}
+  Description: create celery tasks to fetch and store users in mongodb and postgresdb
+
+- URL: postgres/get-users<br>
+  Method: GET<br>
+  Description: get all users from postgres database
+
+- URL: mongo/get-users<br>
+  Method: GET<br>
+  Description: get all users from mongo database
+

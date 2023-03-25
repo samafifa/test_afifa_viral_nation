@@ -34,7 +34,7 @@ Run Project
 
 - URL: /fetch-users<br>
   Method: POST<br>
-  Body: {"count": <integerValue>}
+  Body: {"count": \<integerValue\>}<br>
   Description: create celery tasks to fetch and store users in mongodb and postgresdb
 
 - URL: postgres/get-users<br>

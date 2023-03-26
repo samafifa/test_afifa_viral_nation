@@ -3,12 +3,12 @@ version: '3.6'
 services:
   postgresdb:
     container_name: postgresdb
-    image: postgres:10.7
+    image: postgres:latest
     environment:
       POSTGRES_PASSWORD: admin#afifa  # superuser password, username is postgres
       POSTGRES_DB: test_afifa  # default db created when image first started
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - "./data/postgres:/var/lib/postgresql"
     ports:
       - "5432:5432"
 
@@ -25,14 +25,14 @@ services:
     env_file:
       - project_config.env
     volumes:
-      - ./data/mongo:/data/db
+      - ./data/mongo:/data/mongo
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   redis:
     container_name: redis
     image: redis:6.0.1
     volumes:
-      - ./data/redis:/data
+      - ./data/redis:/data/redis
 
   celery:
     container_name: celery

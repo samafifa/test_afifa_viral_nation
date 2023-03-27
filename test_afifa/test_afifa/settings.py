@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+import logging.config
 from django.core.exceptions import ImproperlyConfigured
 
 import dotenv
@@ -139,60 +140,72 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING_CONFIG = None
+CELERYD_HIJACK_ROOT_LOGGER = True
+
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
+    'version': 1,
+    'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': '%(asctime)s %(name)s : \n%(message)s\n'
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s '
         },
     },
-    "filters": {
-        "require_debug_false": {
-            "()": "django.utils.log.RequireDebugFalse"
-        }
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+        'request_handler': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, f'req_log.log'),
+            'maxBytes': 1024*1024*5,  # 5 MB
+            'backupCount': 10,
+            'formatter': 'standard',
+            'mode': 'a'
+        },
+        'request_error_handler': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, f'req_error_log.log'),
+            'maxBytes': 1024*1024*5,  # 5 MB
+            'backupCount': 10,
+            'formatter': 'standard',
+            'mode': 'a'
+        },
+        'celery_handler': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, f'celery_log.log'),
+            'formatter': 'standard',
+            'mode': 'a'
+        },
     },
-    "handlers": {
-        "console": {
-            "level": "ERROR",
-            # "level": "DEBUG",
-            "filters": ["require_debug_false"],
-            "class": "logging.StreamHandler"
-        }, # file handlers don't work in docker
-        # 'request_error_handler': {
-        #     'level': 'INFO',
-        #     # 'class': 'logging.handlers.RotatingFileHandler',
-        #     'class': 'logging.FileHandler',
-        #     'filename': os.path.join(LOG_DIR, f'req_error_log.log'),
-        #     # 'maxBytes': 1024*1024*5,  # 5 MB  # disabled for windows host
-        #     # 'backupCount': 10,  # disabled for windows host
-        #     'formatter': 'standard',
-        #     'mode': 'a'
-        # },
-        # 'celery_handler': {
-        #     'level': 'ERROR',
-        #     # 'class': 'logging.handlers.RotatingFileHandler',  # disabled for windows host
-        #     'class': 'logging.FileHandler',
-        #     'filename': os.path.join(LOG_DIR, f'celery_log.log'),
-        #     # 'maxBytes': 1024*1024*5,  # 5 MB  disabled for windows host
-        #     # 'backupCount': 10,  # disabled for windows host
-        #     'formatter': 'standard',
-        #     'mode': 'a'
-        # },
-    },
-    "loggers": {
-        'django.request': {
+    'loggers': {
+        '': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False
         },
+        'django': {
+            'handlers': ['request_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'django.request': {
+            'handlers': ['request_error_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
         'celery': {
-            'handlers': ['console'],
-            'level': 'ERROR',
+            'handlers': ['celery_handler'],
+            'level': 'INFO',
             'propagate': False
         }
     }
 }
+
+logging.config.dictConfig(LOGGING)
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

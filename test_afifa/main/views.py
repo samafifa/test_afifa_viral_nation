@@ -1,6 +1,7 @@
 import traceback
 import sys
 import json
+import logging
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -13,7 +14,7 @@ from main.tasks import add_users_to_db
 
 from main.redis_cache import RedisDBConnector
 
-
+logger = logging.getLogger('django.request')
 redis_conn = RedisDBConnector(
     host=REDIS_URL,
     port=6379,
@@ -34,7 +35,8 @@ def add_data_to_product_table():
                         product_name=p['productName']
                     )
     except:
-        traceback.print_exc()
+        # traceback.print_exc()
+        logger.exception(traceback.print_exc())
 
 
 if 'makemigrations' not in sys.argv or 'migrate' not in sys.argv:
@@ -56,7 +58,7 @@ def fetch_users(request):
 
         return Response({'status': True}, status=200)
     except:
-        traceback.print_exc()
+        logger.exception(traceback.print_exc())
         return Response({'error': 'Something went wrong'}, status=500)
 
 
@@ -66,7 +68,7 @@ def get_users_from_postgres_db(request):
         all_users = list(Users.objects.all().values())
         return Response({"allUsers": all_users}, status=200)
     except:
-        traceback.print_exc()
+        logger.exception(traceback.print_exc())
         return Response({'error': 'Something went wrong'}, status=500)
 
 
@@ -76,7 +78,7 @@ def get_users_from_mongo_db(request):
         all_users = list(users.find({}, {'_id': 0}))
         return Response({"allUsers": all_users}, status=200)
     except:
-        traceback.print_exc()
+        logger.exception(traceback.print_exc())
         return Response({'error': 'Something went wrong'}, status=500)
 
 
@@ -86,7 +88,7 @@ def get_products_from_postgres_db(request):
         all_products = list(Product.objects.all().values())
         return Response({"allProducts": all_products}, status=200)
     except:
-        traceback.print_exc()
+        logger.exception(traceback.print_exc())
         return Response({'error': 'Something went wrong'}, status=500)
 
 
@@ -118,6 +120,6 @@ def get_product_by_id(request):
 
         return Response({"product": product}, status=200)
     except:
-        traceback.print_exc()
+        logger.exception(traceback.print_exc())
         return Response({'error': 'Something went wrong'}, status=500)
 
